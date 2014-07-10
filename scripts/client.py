@@ -1,19 +1,30 @@
 #-*- coding:utf-8 -*-
 
 import zmq
+import json
 
-context = zmq.Context()
+def client(dict_sents):
 
-#  Socket to talk to server
-print("Connecting to the server to get the sentences analyzed...")
-socket = context.socket(zmq.REQ)
-socket.connect("tcp://localhost:3001")
+	context = zmq.Context()
 
-#  Do 10 requests, waiting each time for a response
-request = "This is ."
-print("Sending request: %s …" % request)
-socket.send(request)
+	to_send = json.dumps({'request':dict_sents}) 
 
-#  Get the reply.
-message = socket.recv()
-print("Received reply %s" % (message))
+	#  Socket to talk to server
+	print("Connecting to the server to get the sentences analyzed...")
+	socket = context.socket(zmq.REQ)
+	socket.connect("tcp://localhost:3001")
+
+	#  Do 10 requests, waiting each time for a respons
+	print("Sending request…")
+	socket.send(to_send)
+
+	#  Get the reply.
+	result = socket.recv()
+	to_return = json.dumps({'result':result})
+	print("Message received...")
+
+	return to_return
+
+if __name__=="__main__":
+
+	client(json.dumps([{'uuid':'1','sentence':'This is .'},{'uuid':'2','sentence':"She does ."}]))
